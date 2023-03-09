@@ -6,9 +6,9 @@ const isProduction = process.env.NODE_ENV == "production";
 
 const config = {
   entry: './src/js/main.js',
-  // output: {
-  //   path: path.resolve(__dirname, "dist"),
-  // },
+  output: {
+    path: path.resolve(__dirname, "dist"),
+  },
   devServer: {
     open: true,
     host: "localhost",
