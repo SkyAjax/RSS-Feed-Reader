@@ -6,26 +6,21 @@
     <title>Bootstrap w/ Webpack</title>
   </head>
   <body>
-    <div class="container py-4 px-3 mx-auto">
-      <h1>Hello, Bootstrap and Webpack!</h1>
-      <button class="btn btn-primary">Primary button</button>
-    </div>
+    <div class="container">
+        <form>
+        <div class="row ">
+          <div class="col">
+                <div class="form-floating">
+                    <input type="url-input" class="form-control w-100">
+                    <label for="url-input">Ссылка RSS</label>
+                </div>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="h-100 btn-lg btn btn-primary px-sm-5">Добавить</button>
+          </div>
+        </div>
+    </form> 
+      </div>
     <script src="/src/js/main.js"></script>
   </body>
-</html>
-    
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker
-                    .register("service-worker.js")
-                    .then((registration) => {
-                        console.log("Service Worker registered: ", registration);
-                    })
-                    .catch((registrationError) => {
-                        console.error("Service Worker registration failed: ", registrationError);
-                    });
-            });
-        }
-    </script>
 </html>
