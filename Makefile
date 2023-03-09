@@ -4,8 +4,5 @@ install:
 lint:
 	npx eslint .
 
-test-coverage:
-	NODE_OPTIONS=--experimental-vm-modules npm test --coverageProvider=v8 -- --coverage 
-
 develop:
 	npx webpack serve
