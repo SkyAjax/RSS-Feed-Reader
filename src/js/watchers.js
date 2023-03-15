@@ -1,6 +1,5 @@
 import onChange from 'on-change';
 
-
 export default (state) => { 
     return onChange(state, () => {
     const input = document.querySelector('.form-control');
