@@ -8,15 +8,17 @@ export default {
             add: 'Добавить',
             close: 'Закрыть',
         },
-        footer: {
-            createdBy: 'created by ',
-        },
         errors: {
             notValid: 'Ссылка должна быть валидным URL',
             notUnique: 'RSS уже существует',
-        }
-        // modalFooter: {
-        //     fullArticle: 'Читать полностью '
-        // },
+            default: 'Ресурс не содержит валидный RSS',
+        },
+        success: 'RSS успешно загружен',
+        modalFooter: {
+            fullArticle: 'Читать полностью '
+        },
+        author: 'created by <a href="https://github.com/SkyAjax/frontend-project-11" target="_blank">SkyAjax',
+        posts: 'Посты',
+        feeds: 'Фиды',
     },
 }

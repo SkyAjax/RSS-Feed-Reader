@@ -21,8 +21,9 @@ yup.setLocale({
 export default (arr, value) => { 
     return yup.object({
     url: yup.string()
-    .notOneOf([...arr])
+    .notOneOf(arr)
     .required()
+    .trim()
     .url(),
-});
+  });
 }

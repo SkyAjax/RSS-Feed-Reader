@@ -24,10 +24,10 @@
   "homepage": "https://github.com/SkyAjax/frontend-project-11#readme",
   "dependencies": {
     "@popperjs/core": "^2.11.6",
+    "axios": "^1.3.4",
     "bootstrap": "^5.2.3",
     "eslint-config-airbnb-base": "^15.0.0",
     "i18next": "^22.4.11",
-    "lodash": "^4.17.21",
     "on-change": "^4.0.2"
   },
   "devDependencies": {
@@ -36,6 +36,7 @@
     "css-loader": "^6.7.3",
     "eslint": "^8.35.0",
     "html-webpack-plugin": "^5.5.0",
+    "lodash": "^4.17.21",
     "postcss-loader": "^7.0.2",
     "prettier": "^2.8.4",
     "sass": "^1.58.3",
