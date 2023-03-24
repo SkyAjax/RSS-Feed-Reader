@@ -33,12 +33,14 @@ export default () => {
     linksList: [],
     feedsList: [],
     postsList: [],
+    rawParsedData: [],
     errors: [],
   };
   
   const watchedState = createWatchedState(state);
   input.focus();
-
+  const previouslyParsedData = [];
+  
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const newUrl = new FormData(e.target);
@@ -54,8 +56,9 @@ export default () => {
         watchedState.input.state = 'valid';
         const parsedData = parseData(data);
         parsedData.posts.forEach((item) => {
+          previouslyParsedData.push(item);
           const children = Array.from(item.children);
-          const obj = {}
+          const obj = {};
           children.map((child) => {
             const key = child.tagName;
             const value = child.textContent;
@@ -67,9 +70,36 @@ export default () => {
         watchedState.feedsList.push(parsedData.feed);
         watchedState.postsList.push(...itemsArray);
         watchedState.linksList.push(response.url);
+        watchedState.rawParsedData.push(previouslyParsedData);
         watchedState.input.state = 'completed';
         form.reset();
         input.focus();
+        
+        const checkNewPosts = () => {
+          watchedState.linksList.map((link) => {
+          axios.get(createProxyLink(link))
+          .then((data) => {
+            const latestParsedData = parseData(data);
+            const inner = previouslyParsedData.flatMap((item) => item.innerHTML);
+            latestParsedData.posts.forEach((post) => {
+              if (!inner.includes(post.innerHTML)) {
+                previouslyParsedData.push(post);
+                const children = Array.from(post.children);
+                const obj = {};
+                children.map((child) => {
+                  const key = child.tagName;
+                  const value = child.textContent;
+                  obj[key] = value;
+                  obj.id = uniqueId();
+                })
+                watchedState.postsList.push(obj);
+                }
+              })
+            })
+          });
+          setTimeout(checkNewPosts, 5000);
+        };
+        setTimeout(checkNewPosts, 5000);
       })
       .catch((err) => {
         watchedState.errors.push(i18nInstance.t('errors.default'));
@@ -82,4 +112,6 @@ export default () => {
       watchedState.errors.push(err.message);
     });
   });
+
+
 };

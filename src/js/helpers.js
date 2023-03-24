@@ -9,7 +9,7 @@ resources,
 })
 
 export const createProxyLink = (link) => {
-  return `https://allorigins.hexlet.app/get?disableCache=true&url=${link}`
+  return `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`
 };
 
 export const createDefaultView = () => {
@@ -38,7 +38,6 @@ export const createContainer = (list, block) => {
   h2.classList.add('card-title', 'h4');
   h2.textContent = i18nInstance.t(block);
   childDiv.append(h2);
-//   console.log(list)
   if (block === 'posts') {
     list.map((item) => {
       const li = document.createElement('li');
@@ -51,7 +50,7 @@ export const createContainer = (list, block) => {
       a.setAttribute('target', '_blank');
       a.setAttribute ('rel', 'noopener noreferrer');
       li.append(a);
-      ul.append(li);
+      ul.prepend(li);
     })
   };
   if (block === 'feeds') {
