@@ -25,21 +25,21 @@ export default (state) => {
           p.classList.remove('text-danger');
           p.classList.add('text-success');
           p.textContent = i18nInstance.t('success');         
-          const postsDiv = createContainer(state.postsList, 'posts')
+          const postsDiv = createContainer(state.postsList, 'posts', state)
           postsContainer.replaceChildren(postsDiv);
           const feedsDiv = createContainer(state.feedsList, 'feeds');
           feedContainer.replaceChildren(feedsDiv);
-        };
-        if (state.input.state === 'invalid') {
-            input.classList.add('is-invalid');
-        };
-    if (state.input.state === 'loading') {
+      };
+      if (state.input.state === 'invalid') {
+          input.classList.add('is-invalid');
+      };
+      if (state.input.state === 'loading') {
         p.textContent = '';
         input.setAttribute('readonly', 'true');
         input.removeAttribute('spellcheck');
         input.removeAttribute('data-ms-editor');
         button.classList.add('disabled');
-    };
+      };
     state.errors.map((error) => {
         p.textContent = error;
     });

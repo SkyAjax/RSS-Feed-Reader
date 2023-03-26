@@ -7,6 +7,7 @@ export default {
         buttons: {
             add: 'Добавить',
             close: 'Закрыть',
+            view: 'Просмотр',
         },
         errors: {
             notValid: 'Ссылка должна быть валидным URL',

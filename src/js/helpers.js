@@ -26,7 +26,7 @@ export const createDefaultView = () => {
   input.setAttribute('data-ms-editor', 'true');
 };
 
-export const createContainer = (list, block) => {
+export const createContainer = (list, block, state) => {
   const div = document.createElement('div');
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
@@ -43,16 +43,39 @@ export const createContainer = (list, block) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
       const a = document.createElement('a');
+      const button = document.createElement('button');
+      button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+      button.setAttribute('data-id', item.id);
+      button.setAttribute('data-bs-toggle', 'modal');
+      button.setAttribute('data-bs-target', '#modal');
+      button.textContent = i18nInstance.t('buttons.view');
       a.href = item.link;
+      const postUi = state.uiState.showButton.find((post) => post.postId === item.id);
+    if (postUi.state === 'clicked') {
+      a.classList.remove('fw-bold');
+      a.classList.add('fw-normal', 'link-secondary');
+    } else {
       a.classList.add ('fw-bold');
+    }
       a.textContent = item.title;
-      a.setAttribute('data-identity', '3');
+      a.setAttribute('data-id', item.id);
       a.setAttribute('target', '_blank');
       a.setAttribute ('rel', 'noopener noreferrer');
       li.append(a);
+      li.append(button);
       ul.prepend(li);
-    })
-  };
+
+      button.addEventListener('click', () => {
+          const modalTitle = document.querySelector('.modal-title');
+          const modalDescription = document.querySelector('.text-break');
+          modalTitle.textContent = item.title; 
+          modalDescription.textContent = item.description;
+          postUi.state = 'clicked';
+          a.classList.remove('fw-bold');
+          a.classList.add('fw-normal', 'link-secondary');
+          })
+      });
+    };
   if (block === 'feeds') {
     list.map((item) => {
     const [title, description] = item;

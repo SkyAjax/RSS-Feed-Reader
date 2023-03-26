@@ -21,7 +21,7 @@ export default () => {
     document.querySelector('.full-article').textContent = i18nInstance.t('modalFooter.fullArticle'); 
     document.querySelector('.btn-lg').textContent = i18nInstance.t('buttons.add'); 
     document.querySelector('.text-muted').textContent = i18nInstance.t('linkExample'); 
-    document.querySelector('[data-bs-dismiss="modal"]').textContent = i18nInstance.t('buttons.close'); 
+    document.querySelector('.btn-secondary').textContent = i18nInstance.t('buttons.close'); 
     // document.getElementById('credits').textContent = i18nInstance.t('author'); 
   });
 
@@ -34,6 +34,9 @@ export default () => {
     feedsList: [],
     postsList: [],
     rawParsedData: [],
+    uiState: {
+      showButton: [],
+    },
     errors: [],
   };
   
@@ -66,6 +69,7 @@ export default () => {
             obj.id = uniqueId();
           })
           itemsArray.push(obj);
+          watchedState.uiState.showButton.push({ postId: obj.id, state: 'notClicked' })
         })
         watchedState.feedsList.push(parsedData.feed);
         watchedState.postsList.push(...itemsArray);
@@ -76,6 +80,7 @@ export default () => {
         input.focus();
         
         const checkNewPosts = () => {
+          console.log('lets go')
           watchedState.linksList.map((link) => {
           axios.get(createProxyLink(link))
           .then((data) => {
@@ -91,6 +96,7 @@ export default () => {
                   const value = child.textContent;
                   obj[key] = value;
                   obj.id = uniqueId();
+                  watchedState.uiState.showButton.push({ postId: obj.id, state: 'notClicked' });
                 })
                 watchedState.postsList.push(obj);
                 }
@@ -112,6 +118,4 @@ export default () => {
       watchedState.errors.push(err.message);
     });
   });
-
-
 };
