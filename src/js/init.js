@@ -80,7 +80,6 @@ export default () => {
         input.focus();
         
         const checkNewPosts = () => {
-          console.log('lets go')
           watchedState.linksList.map((link) => {
           axios.get(createProxyLink(link))
           .then((data) => {
@@ -97,11 +96,11 @@ export default () => {
                   obj[key] = value;
                   obj.id = uniqueId();
                   watchedState.uiState.showButton.push({ postId: obj.id, state: 'notClicked' });
-                })
+                });
                 watchedState.postsList.push(obj);
-                }
-              })
-            })
+                };
+              });
+            });
           });
           setTimeout(checkNewPosts, 5000);
         };
@@ -111,7 +110,7 @@ export default () => {
         watchedState.errors.push(i18nInstance.t('errors.default'));
         console.error(err);
         watchedState.input.state = 'valid';
-      })
+      });
     })
     .catch((err) => {
       watchedState.input.state = 'invalid';

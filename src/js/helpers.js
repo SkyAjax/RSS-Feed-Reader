@@ -9,7 +9,7 @@ resources,
 })
 
 export const createProxyLink = (link) => {
-  return `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`
+  return `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`;
 };
 
 export const createDefaultView = () => {
@@ -51,21 +51,21 @@ export const createContainer = (list, block, state) => {
       button.textContent = i18nInstance.t('buttons.view');
       a.href = item.link;
       const postUi = state.uiState.showButton.find((post) => post.postId === item.id);
-    if (postUi.state === 'clicked') {
-      a.classList.remove('fw-bold');
-      a.classList.add('fw-normal', 'link-secondary');
-    } else {
-      a.classList.add ('fw-bold');
-    }
-      a.textContent = item.title;
-      a.setAttribute('data-id', item.id);
-      a.setAttribute('target', '_blank');
-      a.setAttribute ('rel', 'noopener noreferrer');
-      li.append(a);
-      li.append(button);
-      ul.prepend(li);
+      if (postUi.state === 'clicked') {
+        a.classList.remove('fw-bold');
+        a.classList.add('fw-normal', 'link-secondary');
+      } else {
+        a.classList.add ('fw-bold');
+      }
+        a.textContent = item.title;
+        a.setAttribute('data-id', item.id);
+        a.setAttribute('target', '_blank');
+        a.setAttribute ('rel', 'noopener noreferrer');
+        li.append(a);
+        li.append(button);
+        ul.prepend(li);
 
-      button.addEventListener('click', () => {
+        button.addEventListener('click', () => {
           const modalTitle = document.querySelector('.modal-title');
           const modalDescription = document.querySelector('.text-break');
           modalTitle.textContent = item.title; 
@@ -73,7 +73,7 @@ export const createContainer = (list, block, state) => {
           postUi.state = 'clicked';
           a.classList.remove('fw-bold');
           a.classList.add('fw-normal', 'link-secondary');
-          })
+        })
       });
     };
   if (block === 'feeds') {
@@ -91,11 +91,11 @@ export const createContainer = (list, block, state) => {
     li.append(feedsP);   
     ul.append(li);  
     });
-  }
+  };
   div.append(childDiv);
   if (div.lastElementChild === childDiv) {
     div.append(ul);
-  }
+  };
   div.replaceChild(ul, div.lastElementChild);
   return div;
 };

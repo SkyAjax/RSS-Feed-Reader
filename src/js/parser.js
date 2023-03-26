@@ -6,6 +6,4 @@ export default (data) => {
     obj.feed = [parsedData.querySelector('title').textContent, parsedData.querySelector('description').textContent];
     obj.posts = [...parsedData.querySelectorAll('item')];
     return obj;
-    // console.log(parsedData);
-    // return parsedData.querySelectorAll('item');
-}
+};
