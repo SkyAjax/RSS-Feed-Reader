@@ -108,12 +108,12 @@ export default () => {
           })
           .catch((error) => {
             console.error(error.message);
+            console.log(error.isAxiosError);
             if (error.isAxiosError) {
               watchedState.errors.push(i18nInstance.t('errors.network'));
             } else {
               watchedState.errors.push(i18nInstance.t('errors.default'));
             }
-            watchedState.errors.push(error.message);
             watchedState.input.state = 'valid';
           });
       })
