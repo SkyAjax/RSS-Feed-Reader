@@ -4,10 +4,10 @@ import resources from '../locales';
 
 const i18nInstance = i18n.createInstance();
 i18nInstance.init({
-lng: 'ru',
-debug: true,
-resources,
-})
+  lng: 'ru',
+  debug: true,
+  resources,
+});
 
 yup.setLocale({
   mixed: {
@@ -15,15 +15,13 @@ yup.setLocale({
   },
   string: {
     url: i18nInstance.t('errors.notValid'),
-},
-})
+  },
+});
 
-export default (arr, value) => { 
-    return yup.object({
-    url: yup.string()
+export default (arr) => yup.object({
+  url: yup.string()
     .notOneOf(arr)
     .required()
     .trim()
     .url(),
-  });
-}
+});
