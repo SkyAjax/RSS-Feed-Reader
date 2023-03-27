@@ -14,7 +14,6 @@ export default (state) => {
   const postsContainer = document.querySelector('.posts');
   const feedContainer = document.querySelector('.feeds');
   return onChange(state, () => {
-    console.log(state.input.state);
       const input = document.querySelector('.form-control');
       const p = document.querySelector('.feedback');
       const button = document.querySelector('.btn-lg');

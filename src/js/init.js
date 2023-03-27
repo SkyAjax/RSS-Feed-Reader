@@ -106,9 +106,9 @@ export default () => {
         };
         setTimeout(checkNewPosts, 5000);
       })
-      .catch((err) => {
-        watchedState.errors.push(i18nInstance.t('errors.default'));
-        console.error(err);
+      .catch(function (error) {
+        error.isAxiosError ? watchedState.errors.push(i18nInstance.t('errors.network')) : watchedState.errors.push(i18nInstance.t('errors.default'));
+        watchedState.errors.push(err.message);
         watchedState.input.state = 'valid';
       });
     })
