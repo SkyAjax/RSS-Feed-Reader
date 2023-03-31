@@ -22,104 +22,80 @@ export default () => {
       document.querySelector('.btn-lg').textContent = i18nInstance.t('buttons.add');
       document.querySelector('.text-muted').textContent = i18nInstance.t('linkExample');
       document.querySelector('.btn-secondary').textContent = i18nInstance.t('buttons.close');
-    // document.getElementById('credits').textContent = i18nInstance.t('author');
-    });
+      document.getElementById('credits').innerHTML = i18nInstance.t('author', { author: '<a href="https://github.com/SkyAjax/frontend-project-11" target="_blank">' });
 
-  const form = document.querySelector('form');
-  const input = document.querySelector('.form-control');
+      const form = document.querySelector('form');
 
-  const state = {
-    input: { state: 'valid' },
-    linksList: [],
-    feedsList: [],
-    postsList: [],
-    rawParsedData: [],
-    uiState: {
-      showButton: [],
-    },
-    errors: [],
-  };
+      const state = {
+        input: { state: 'idle' },
+        linksList: [],
+        feedsList: [],
+        postsList: [],
+        rawParsedData: [],
+        uiState: {
+          previewButton: [],
+        },
+        errors: [],
+      };
 
-  const watchedState = createWatchedState(state);
-  input.focus();
-  const previouslyParsedData = [];
+      const watchedState = createWatchedState(state);
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const newUrl = new FormData(e.target);
-    const link = { url: newUrl.get('url').trim() };
-    const validationSchema = createYupSchema(watchedState.linksList, link);
-    validationSchema.validate(link)
-      .then((response) => {
-        const itemsArray = [];
-        watchedState.errors.length = 0;
-        watchedState.input.state = 'loading';
-        axios.get(createProxyLink(response.url))
-          .then((data) => {
-            watchedState.input.state = 'valid';
-            const parsedData = parseData(data);
-            parsedData.posts.forEach((item) => {
-              previouslyParsedData.push(item);
-              const children = Array.from(item.children);
-              const obj = {};
-              children.forEach((child) => {
-                const key = child.tagName;
-                const value = child.textContent;
-                obj[key] = value;
-                obj.id = uniqueId();
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newUrl = new FormData(e.target);
+        const link = { url: newUrl.get('url').trim() };
+        const validationSchema = createYupSchema(watchedState.linksList, link);
+        validationSchema.validate(link)
+          .then((response) => {
+            watchedState.errors.length = 0;
+            watchedState.input.state = 'loading';
+            axios.get(createProxyLink(response.url))
+              .then((data) => {
+                watchedState.input.state = 'idle';
+                const parsedData = parseData(data);
+                parsedData.posts.forEach((item) => {
+                  const id = uniqueId();
+                  item.setAttribute('id', id);
+                  watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
+                });
+                watchedState.feedsList.push(parsedData);
+                watchedState.input.state = 'completed';
+              })
+              .catch((error) => {
+                console.error(error.message);
+                if (error.isAxiosError) {
+                  watchedState.errors.push(error.code);
+                } else {
+                  watchedState.errors.push('DEFAULT');
+                }
+                watchedState.input.state = 'idle';
               });
-              itemsArray.push(obj);
-              watchedState.uiState.showButton.push({ postId: obj.id, state: 'notClicked' });
-            });
-            watchedState.feedsList.push(parsedData.feed);
-            watchedState.postsList.push(...itemsArray);
-            watchedState.linksList.push(response.url);
-            watchedState.rawParsedData.push(previouslyParsedData);
-            watchedState.input.state = 'completed';
-            form.reset();
-            input.focus();
-
-            const checkNewPosts = () => {
-              watchedState.linksList.forEach((url) => {
-                axios.get(createProxyLink(url))
-                  .then((responseData) => {
-                    const latestParsedData = parseData(responseData);
-                    const inner = previouslyParsedData.flatMap((item) => item.innerHTML);
-                    latestParsedData.posts.forEach((post) => {
-                      if (!inner.includes(post.innerHTML)) {
-                        previouslyParsedData.push(post);
-                        const children = Array.from(post.children);
-                        const obj = {};
-                        children.forEach((child) => {
-                          const key = child.tagName;
-                          const value = child.textContent;
-                          obj[key] = value;
-                          obj.id = uniqueId();
-                          watchedState.uiState.showButton.push({ postId: obj.id, state: 'notClicked' });
-                        });
-                        watchedState.postsList.push(obj);
-                      }
-                    });
-                  });
-              });
-              setTimeout(checkNewPosts, 5000);
-            };
-            setTimeout(checkNewPosts, 5000);
           })
-          .catch((error) => {
-            console.error(error.message);
-            console.log(error.isAxiosError);
-            if (error.isAxiosError) {
-              watchedState.errors.push(i18nInstance.t('errors.network'));
-            } else {
-              watchedState.errors.push(i18nInstance.t('errors.default'));
-            }
-            watchedState.input.state = 'valid';
+          .catch((err) => {
+            watchedState.input.state = 'failed';
+            watchedState.errors.push(err.message);
           });
-      })
-      .catch((err) => {
-        watchedState.input.state = 'invalid';
-        watchedState.errors.push(err.message);
       });
-  });
+      const checkNewPosts = () => {
+        watchedState.feedsList.forEach((feed) => {
+          console.log(feed.channel.querySelector('link'));
+          axios.get(createProxyLink(url.textContent))
+            .then((responseData) => {
+              const latestParsedData = parseData(responseData);
+              const inner = watchedState.feedsList.posts.flatMap((item) => item.innerHTML);
+              latestParsedData.posts.forEach((post) => {
+                if (!inner.includes(post.innerHTML)) {
+                  const id = uniqueId();
+                  post.setAttribute('id', id);
+                  console.log(post);
+                  watchedState.feedsList.posts.push(post);
+                  watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
+                }
+              });
+            });
+        });
+        setTimeout(checkNewPosts, 5000);
+      };
+      setTimeout(checkNewPosts, 5000);
+    });
 };

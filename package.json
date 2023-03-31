@@ -1,7 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "My webpack project",
+  "description": "RSS Feed Reader",
   "main": "src/js/main.js",
   "scripts": {
     "start": "webpack serve --mode development",
@@ -35,8 +35,9 @@
     "@webpack-cli/generators": "^3.0.1",
     "autoprefixer": "^10.4.13",
     "css-loader": "^6.7.3",
-    "eslint": "^8.36.0",
-    "eslint-config-airbnb": "^19.0.4",
+    "eslint": "^8.37.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
     "html-webpack-plugin": "^5.5.0",
     "postcss-loader": "^7.0.2",
     "prettier": "^2.8.4",

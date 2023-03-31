@@ -17,7 +17,7 @@ export default {
       network: 'Ошибка сети',
     },
     success: 'RSS успешно загружен',
-    author: 'created by <a href="https://github.com/SkyAjax/frontend-project-11" target="_blank">SkyAjax',
+    author: 'created by {{-author}} SkyAjax',
     posts: 'Посты',
     feeds: 'Фиды',
   },

@@ -1,14 +1,6 @@
 import onChange from 'on-change';
-import i18n from 'i18next';
-import resources from '../locales';
+import i18nInstance from '../locales/i18n';
 import { createDefaultView, createContainer } from './helpers';
-
-const i18nInstance = i18n.createInstance();
-i18nInstance.init({
-  lng: 'ru',
-  debug: true,
-  resources,
-});
 
 export default (state) => {
   const postsContainer = document.querySelector('.posts');
@@ -29,7 +21,7 @@ export default (state) => {
       const feedsDiv = createContainer(state.feedsList, 'feeds');
       feedContainer.replaceChildren(feedsDiv);
     }
-    if (state.input.state === 'invalid') {
+    if (state.input.state === 'failed') {
       input.classList.add('is-invalid');
     }
     if (state.input.state === 'loading') {
@@ -40,7 +32,13 @@ export default (state) => {
       button.classList.add('disabled');
     }
     state.errors.forEach((error) => {
-      p.textContent = error;
+      if (error === 'ERR_NETWORK') {
+        p.textContent = i18nInstance.t('errors.network');
+      } else if (error === 'DEFAULT') {
+        p.textContent = i18nInstance.t('errors.default');
+      } else {
+        p.textContent = error;
+      }
     });
   });
 };

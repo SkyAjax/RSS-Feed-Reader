@@ -1,14 +1,9 @@
-import i18n from 'i18next';
-import resources from '../locales';
+import i18nInstance from '../locales/i18n';
 
-const i18nInstance = i18n.createInstance();
-i18nInstance.init({
-  lng: 'ru',
-  debug: true,
-  resources,
-});
-
-export const createProxyLink = (link) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`;
+export const createProxyLink = (link) => {
+  const url = new URL(`/get?disableCache=true&url=${encodeURIComponent(link)}`, 'https://allorigins.hexlet.app');
+  return url.href;
+};
 
 export const createDefaultView = () => {
   const input = document.querySelector('.form-control');
@@ -22,9 +17,12 @@ export const createDefaultView = () => {
   input.removeAttribute('readonly');
   input.setAttribute('spellcheck', 'false');
   input.setAttribute('data-ms-editor', 'true');
+  input.focus();
 };
 
 export const createContainer = (list, block, state) => {
+  const input = document.querySelector('.form-control');
+  const form = document.querySelector('form');
   const div = document.createElement('div');
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
@@ -85,8 +83,8 @@ export const createContainer = (list, block, state) => {
       h3.classList.add('h6', 'm-0');
       const feedsP = document.createElement('p');
       feedsP.classList.add('m-0', 'small', 'text-black-50');
-      h3.textContent = title;
-      feedsP.textContent = description;
+      h3.textContent = title.textContent;
+      feedsP.textContent = description.textContent;
       li.append(h3);
       li.append(feedsP);
       ul.append(li);
@@ -97,5 +95,7 @@ export const createContainer = (list, block, state) => {
     div.append(ul);
   }
   div.replaceChild(ul, div.lastElementChild);
+  form.reset();
+  input.focus();
   return div;
 };
