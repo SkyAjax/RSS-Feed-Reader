@@ -1,3 +1,4 @@
+import { sortBy } from 'lodash';
 import i18nInstance from '../locales/i18n';
 
 export const createProxyLink = (link) => {
@@ -35,8 +36,8 @@ export const createContainer = (list, block, state) => {
   h2.textContent = i18nInstance.t(block);
   childDiv.append(h2);
   if (block === 'posts') {
-    console.log(list);
-    list.forEach((item) => {
+    const sortedPosts = sortBy(list, 'id');
+    sortedPosts.forEach((item) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
       const a = document.createElement('a');
@@ -47,7 +48,7 @@ export const createContainer = (list, block, state) => {
       button.setAttribute('data-bs-target', '#modal');
       button.textContent = i18nInstance.t('buttons.view');
       a.href = item.link;
-      const postUi = state.uiState.showButton.find((post) => post.postId === item.id);
+      const postUi = state.uiState.previewButton.find((post) => post.id === item.id);
       if (postUi.state === 'clicked') {
         a.classList.remove('fw-bold');
         a.classList.add('fw-normal', 'link-secondary');
@@ -76,16 +77,16 @@ export const createContainer = (list, block, state) => {
     });
   }
   if (block === 'feeds') {
-    list.forEach((item) => {
-      const [title, description] = item;
+    list.feedsList.forEach((feed) => {
+      const { title, description } = feed;
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'border-0', 'border-end-0');
       const h3 = document.createElement('h3');
       h3.classList.add('h6', 'm-0');
       const feedsP = document.createElement('p');
       feedsP.classList.add('m-0', 'small', 'text-black-50');
-      h3.textContent = title.textContent;
-      feedsP.textContent = description.textContent;
+      h3.textContent = title;
+      feedsP.textContent = description;
       li.append(h3);
       li.append(feedsP);
       ul.append(li);

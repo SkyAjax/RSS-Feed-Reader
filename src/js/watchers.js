@@ -16,9 +16,11 @@ export default (state) => {
       p.classList.remove('text-danger');
       p.classList.add('text-success');
       p.textContent = i18nInstance.t('success');
-      const postsDiv = createContainer(state.feedsList.items, 'posts', state);
+      const items = state.feedsList.flatMap((feed) => feed.items);
+      console.log(items);
+      const postsDiv = createContainer(items, 'posts', state);
       postsContainer.replaceChildren(postsDiv);
-      const feedsDiv = createContainer(state.feedsList, 'feeds');
+      const feedsDiv = createContainer(state, 'feeds');
       feedContainer.replaceChildren(feedsDiv);
     }
     if (state.input.state === 'failed') {

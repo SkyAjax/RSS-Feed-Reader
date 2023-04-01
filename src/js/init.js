@@ -28,10 +28,7 @@ export default () => {
 
       const state = {
         input: { state: 'idle' },
-        linksList: [],
         feedsList: [],
-        postsList: [],
-        rawParsedData: [],
         uiState: {
           previewButton: [],
         },
@@ -56,8 +53,9 @@ export default () => {
                 const parsedData = parseData(data);
                 console.log(parsedData);
                 parsedData.items.forEach((item) => {
+                  const post = item;
                   const id = uniqueId();
-                  item.setAttribute('id', id);
+                  post.id = id;
                   watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
                 });
                 watchedState.feedsList.push(parsedData);
@@ -79,24 +77,19 @@ export default () => {
           });
       });
       const checkNewPosts = () => {
-      const linksList = watchedState.feedsList.map((feed) => feed.link);
-        // console.log(linksList);
-        linksList.forEach((url) => {
-          axios.get(createProxyLink(url))
+        watchedState.feedsList.forEach((feed) => {
+          const { link } = feed;
+          axios.get(createProxyLink(link))
             .then((responseData) => {
               const latestParsedData = parseData(responseData);
-              // console.log(watchedState.feedsList.items);
-              const posts = watchedState.feedsList.filter((item) => item.tagName === 'item');
-              const inner = posts.forEach((item) => {
-                console.log(item);
-              });
-              // console.log(inner);
+              const links = feed.items.map((item) => item.link);
               latestParsedData.items.forEach((item) => {
-                if (!inner.includes(item.innerHTML)) {
+                if (!links.includes(item.link)) {
+                  const post = item;
                   const id = uniqueId();
-                  item.setAttribute('id', id);
-                  watchedState.feedsList.items.push(item);
+                  post.id = id;
                   watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
+                  feed.items.push(item);
                 }
               });
             });
