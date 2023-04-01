@@ -31,6 +31,7 @@ export default () => {
         feedsList: [],
         uiState: {
           previewButton: [],
+          modalWindow: null,
         },
         errors: [],
       };
@@ -51,10 +52,9 @@ export default () => {
               .then((data) => {
                 watchedState.input.state = 'idle';
                 const parsedData = parseData(data);
-                console.log(parsedData);
                 parsedData.items.forEach((item) => {
                   const post = item;
-                  const id = uniqueId();
+                  const id = Number(uniqueId());
                   post.id = id;
                   watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
                 });
@@ -86,7 +86,7 @@ export default () => {
               latestParsedData.items.forEach((item) => {
                 if (!links.includes(item.link)) {
                   const post = item;
-                  const id = uniqueId();
+                  const id = Number(uniqueId());
                   post.id = id;
                   watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
                   feed.items.push(item);

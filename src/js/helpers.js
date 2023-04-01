@@ -64,15 +64,9 @@ export const createContainer = (list, block, state) => {
       ul.prepend(li);
 
       button.addEventListener('click', () => {
-        const modalTitle = document.querySelector('.modal-title');
-        const modalDescription = document.querySelector('.text-break');
-        const articleButton = document.querySelector('.full-article');
-        articleButton.href = item.link;
-        modalTitle.textContent = item.title;
-        modalDescription.textContent = item.description;
         postUi.state = 'clicked';
-        a.classList.remove('fw-bold');
-        a.classList.add('fw-normal', 'link-secondary');
+        const { uiState } = state;
+        uiState.modalWindow = item.id;
       });
     });
   }

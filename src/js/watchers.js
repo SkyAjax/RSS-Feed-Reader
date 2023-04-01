@@ -6,6 +6,7 @@ export default (state) => {
   const postsContainer = document.querySelector('.posts');
   const feedContainer = document.querySelector('.feeds');
   return onChange(state, () => {
+    console.log(state);
     const input = document.querySelector('.form-control');
     const p = document.querySelector('.feedback');
     const button = document.querySelector('.btn-lg');
@@ -17,11 +18,19 @@ export default (state) => {
       p.classList.add('text-success');
       p.textContent = i18nInstance.t('success');
       const items = state.feedsList.flatMap((feed) => feed.items);
-      console.log(items);
       const postsDiv = createContainer(items, 'posts', state);
       postsContainer.replaceChildren(postsDiv);
       const feedsDiv = createContainer(state, 'feeds');
       feedContainer.replaceChildren(feedsDiv);
+
+      const activePost = items.find((post) => post.id === state.uiState.modalWindow);
+      console.log(activePost);
+      const modalTitle = document.querySelector('.modal-title');
+      const modalDescription = document.querySelector('.text-break');
+      const articleButton = document.querySelector('.full-article');
+      articleButton.href = activePost.link;
+      modalTitle.textContent = activePost.title;
+      modalDescription.textContent = activePost.description;
     }
     if (state.input.state === 'failed') {
       input.classList.add('is-invalid');
