@@ -35,6 +35,7 @@ export const createContainer = (list, block, state) => {
   h2.textContent = i18nInstance.t(block);
   childDiv.append(h2);
   if (block === 'posts') {
+    console.log(list);
     list.forEach((item) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');

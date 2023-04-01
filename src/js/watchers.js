@@ -16,7 +16,7 @@ export default (state) => {
       p.classList.remove('text-danger');
       p.classList.add('text-success');
       p.textContent = i18nInstance.t('success');
-      const postsDiv = createContainer(state.postsList, 'posts', state);
+      const postsDiv = createContainer(state.feedsList.items, 'posts', state);
       postsContainer.replaceChildren(postsDiv);
       const feedsDiv = createContainer(state.feedsList, 'feeds');
       feedContainer.replaceChildren(feedsDiv);

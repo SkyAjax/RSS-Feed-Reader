@@ -42,9 +42,10 @@ export default () => {
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
+        const linksList = watchedState.feedsList.map((feed) => feed.link);
         const newUrl = new FormData(e.target);
         const link = { url: newUrl.get('url').trim() };
-        const validationSchema = createYupSchema(watchedState.linksList, link);
+        const validationSchema = createYupSchema(linksList, link);
         validationSchema.validate(link)
           .then((response) => {
             watchedState.errors.length = 0;
@@ -53,7 +54,8 @@ export default () => {
               .then((data) => {
                 watchedState.input.state = 'idle';
                 const parsedData = parseData(data);
-                parsedData.posts.forEach((item) => {
+                console.log(parsedData);
+                parsedData.items.forEach((item) => {
                   const id = uniqueId();
                   item.setAttribute('id', id);
                   watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
@@ -77,18 +79,23 @@ export default () => {
           });
       });
       const checkNewPosts = () => {
-        watchedState.feedsList.forEach((feed) => {
-          console.log(feed.channel.querySelector('link'));
-          axios.get(createProxyLink(url.textContent))
+      const linksList = watchedState.feedsList.map((feed) => feed.link);
+        // console.log(linksList);
+        linksList.forEach((url) => {
+          axios.get(createProxyLink(url))
             .then((responseData) => {
               const latestParsedData = parseData(responseData);
-              const inner = watchedState.feedsList.posts.flatMap((item) => item.innerHTML);
-              latestParsedData.posts.forEach((post) => {
-                if (!inner.includes(post.innerHTML)) {
+              // console.log(watchedState.feedsList.items);
+              const posts = watchedState.feedsList.filter((item) => item.tagName === 'item');
+              const inner = posts.forEach((item) => {
+                console.log(item);
+              });
+              // console.log(inner);
+              latestParsedData.items.forEach((item) => {
+                if (!inner.includes(item.innerHTML)) {
                   const id = uniqueId();
-                  post.setAttribute('id', id);
-                  console.log(post);
-                  watchedState.feedsList.posts.push(post);
+                  item.setAttribute('id', id);
+                  watchedState.feedsList.items.push(item);
                   watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
                 }
               });
