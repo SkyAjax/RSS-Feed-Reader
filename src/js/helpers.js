@@ -48,8 +48,7 @@ export const createContainer = (list, block, state) => {
       button.setAttribute('data-bs-target', '#modal');
       button.textContent = i18nInstance.t('buttons.view');
       a.href = item.link;
-      const postUi = state.uiState.previewButton.find((post) => post.id === item.id);
-      if (postUi.state === 'clicked') {
+      if (state.uiState.previewButton.includes(item.id)) {
         a.classList.remove('fw-bold');
         a.classList.add('fw-normal', 'link-secondary');
       } else {
@@ -62,12 +61,6 @@ export const createContainer = (list, block, state) => {
       li.append(a);
       li.append(button);
       ul.prepend(li);
-
-      button.addEventListener('click', () => {
-        postUi.state = 'clicked';
-        const { uiState } = state;
-        uiState.modalWindow = item.id;
-      });
     });
   }
   if (block === 'feeds') {

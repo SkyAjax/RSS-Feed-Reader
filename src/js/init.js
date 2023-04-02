@@ -54,9 +54,7 @@ export default () => {
                 const parsedData = parseData(data);
                 parsedData.items.forEach((item) => {
                   const post = item;
-                  const id = Number(uniqueId());
-                  post.id = id;
-                  watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
+                  post.id = Number(uniqueId());
                 });
                 watchedState.feedsList.push(parsedData);
                 watchedState.input.state = 'completed';
@@ -76,6 +74,16 @@ export default () => {
             watchedState.errors.push(err.message);
           });
       });
+
+      const postsContainer = document.querySelector('.posts');
+      postsContainer.addEventListener('click', (e) => {
+        if (e.target.dataset.bsToggle !== 'modal') {
+          return;
+        }
+        watchedState.uiState.modalWindow = Number(e.target.dataset.id);
+        watchedState.uiState.previewButton.push(Number(e.target.dataset.id));
+      });
+
       const checkNewPosts = () => {
         watchedState.feedsList.forEach((feed) => {
           const { link } = feed;
@@ -86,9 +94,7 @@ export default () => {
               latestParsedData.items.forEach((item) => {
                 if (!links.includes(item.link)) {
                   const post = item;
-                  const id = Number(uniqueId());
-                  post.id = id;
-                  watchedState.uiState.previewButton.push({ id, state: 'notClicked' });
+                  post.id = Number(uniqueId());
                   feed.items.push(item);
                 }
               });
