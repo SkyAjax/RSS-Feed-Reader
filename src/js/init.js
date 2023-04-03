@@ -52,6 +52,8 @@ export default () => {
               .then((data) => {
                 watchedState.input.state = 'idle';
                 const parsedData = parseData(data);
+                parsedData.link = response.url;
+                console.log(parsedData);
                 parsedData.items.forEach((item) => {
                   const post = item;
                   post.id = Number(uniqueId());
