@@ -13,7 +13,6 @@ export default (response) => {
   return {
     title: parsedData.querySelector('title').textContent,
     description: parsedData.querySelector('description').textContent,
-    link: response.data.status.url,
     items: itemsArray,
   };
 };
