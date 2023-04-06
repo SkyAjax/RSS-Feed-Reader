@@ -13,7 +13,7 @@ export default {
     errors: {
       notValid: 'Ссылка должна быть валидным URL',
       notUnique: 'RSS уже существует',
-      default: 'Ресурс не содержит валидный RSS',
+      noRss: 'Ресурс не содержит валидный RSS',
       network: 'Ошибка сети',
     },
     success: 'RSS успешно загружен',

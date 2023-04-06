@@ -8,9 +8,11 @@ import { createProxyLink } from './helpers';
 import parseData from './parser';
 
 export default () => {
+  const defaultLanguage = 'ru';
+
   const i18nInstance = i18n.createInstance();
   i18nInstance.init({
-    lng: 'ru',
+    lng: defaultLanguage,
     debug: true,
     resources,
   })
@@ -27,52 +29,67 @@ export default () => {
       const form = document.querySelector('form');
 
       const state = {
-        input: { state: 'idle' },
+        activeLanguage: defaultLanguage,
+        feed: {
+          state: 'idle',
+          error: '',
+        },
+        input: { state: 'valid' },
         feedsList: [],
+        itemsList: [],
         uiState: {
           previewButton: [],
           modalWindow: null,
         },
-        errors: [],
       };
 
-      const watchedState = createWatchedState(state);
+      const watchedState = createWatchedState(state, i18nInstance);
+      watchedState.feed.state = 'idle';
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const linksList = watchedState.feedsList.map((feed) => feed.link);
         const newUrl = new FormData(e.target);
         const link = { url: newUrl.get('url').trim() };
+        const linksList = watchedState.feedsList.map((feed) => feed.link);
         const validationSchema = createYupSchema(linksList, link);
         validationSchema.validate(link)
           .then((response) => {
-            watchedState.errors.length = 0;
-            watchedState.input.state = 'loading';
+            watchedState.feed.error = '';
+            watchedState.feed.state = 'loading';
             axios.get(createProxyLink(response.url))
               .then((data) => {
                 watchedState.input.state = 'idle';
                 const parsedData = parseData(data);
-                parsedData.link = response.url;
+                parsedData.feed.link = response.url;
+                const feedId = Number(uniqueId());
+                parsedData.feed.id = feedId;
                 parsedData.items.forEach((item) => {
                   const post = item;
+                  post.feedId = feedId;
                   post.id = Number(uniqueId());
                 });
-                watchedState.feedsList.push(parsedData);
-                watchedState.input.state = 'completed';
+                watchedState.feedsList.push(parsedData.feed);
+                watchedState.itemsList.push(...parsedData.items);
+                watchedState.input.state = 'valid';
+                watchedState.feed.state = 'completed';
               })
               .catch((error) => {
                 console.error(error.message);
                 if (error.isAxiosError) {
-                  watchedState.errors.push(error.code);
+                  watchedState.feed.error = error.code;
+                } else if (error.isParseError) {
+                  watchedState.feed.error = error.code;
                 } else {
-                  watchedState.errors.push('DEFAULT');
+                  watchedState.feed.error = 'PARSE';
                 }
-                watchedState.input.state = 'idle';
+                watchedState.input.state = 'invalid';
+                watchedState.feed.state = 'failed';
               });
           })
           .catch((err) => {
-            watchedState.input.state = 'failed';
-            watchedState.errors.push(err.message);
+            watchedState.feed.error = i18nInstance.t(err.message);
+            watchedState.input.state = 'invalid';
+            watchedState.feed.state = 'failed';
           });
       });
 
@@ -86,21 +103,29 @@ export default () => {
       });
 
       const checkNewPosts = () => {
-        watchedState.feedsList.forEach((feed) => {
-          const { link } = feed;
-          axios.get(createProxyLink(link))
+        const linksList = watchedState.feedsList.map((feed) => feed.link);
+        if (linksList.length !== 0) {
+          Promise.all(linksList.map((link) => axios.get(createProxyLink(link))))
             .then((responseData) => {
-              const latestParsedData = parseData(responseData);
-              const links = feed.items.map((item) => item.link);
-              latestParsedData.items.forEach((item) => {
-                if (!links.includes(item.link)) {
-                  const post = item;
-                  post.id = Number(uniqueId());
-                  feed.items.push(item);
-                }
+              responseData.forEach((response) => {
+                const latestParsedData = parseData(response);
+                const links = watchedState.itemsList
+                  .flatMap((items) => items)
+                  .map((item) => item.link);
+                latestParsedData.items.forEach((item) => {
+                  if (!links.includes(item.link)) {
+                    const feedId = watchedState.feedsList
+                      .find((feed) => feed.title === latestParsedData.feed.title);
+                    const post = item;
+                    post.feedId = feedId.id;
+                    post.id = Number(uniqueId());
+                    watchedState.itemsList.push(item);
+                  }
+                });
               });
-            });
-        });
+            })
+            .finally(() => null);
+        }
         setTimeout(checkNewPosts, 5000);
       };
       setTimeout(checkNewPosts, 5000);

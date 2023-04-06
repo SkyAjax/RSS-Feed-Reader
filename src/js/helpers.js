@@ -1,29 +1,11 @@
 import { sortBy } from 'lodash';
-import i18nInstance from '../locales/i18n';
 
 export const createProxyLink = (link) => {
   const url = new URL(`/get?disableCache=true&url=${encodeURIComponent(link)}`, 'https://allorigins.hexlet.app');
   return url.href;
 };
 
-export const createDefaultView = () => {
-  const input = document.querySelector('.form-control');
-  const p = document.querySelector('.feedback');
-  const button = document.querySelector('.btn-lg');
-  p.textContent = '';
-  p.classList.add('text-danger');
-  p.classList.remove('text-success');
-  button.classList.remove('disabled');
-  input.classList.remove('is-invalid');
-  input.removeAttribute('readonly');
-  input.setAttribute('spellcheck', 'false');
-  input.setAttribute('data-ms-editor', 'true');
-  input.focus();
-};
-
-export const createContainer = (list, block, state) => {
-  const input = document.querySelector('.form-control');
-  const form = document.querySelector('form');
+export const createContainer = (state, block, i18nInstance) => {
   const div = document.createElement('div');
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
@@ -36,7 +18,9 @@ export const createContainer = (list, block, state) => {
   h2.textContent = i18nInstance.t(block);
   childDiv.append(h2);
   if (block === 'posts') {
-    const sortedPosts = sortBy(list, 'id');
+    const { itemsList } = state;
+    console.log(itemsList);
+    const sortedPosts = sortBy(itemsList, 'id');
     sortedPosts.forEach((item) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
@@ -64,7 +48,7 @@ export const createContainer = (list, block, state) => {
     });
   }
   if (block === 'feeds') {
-    list.feedsList.forEach((feed) => {
+    state.feedsList.forEach((feed) => {
       const { title, description } = feed;
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'border-0', 'border-end-0');
@@ -84,7 +68,5 @@ export const createContainer = (list, block, state) => {
     div.append(ul);
   }
   div.replaceChild(ul, div.lastElementChild);
-  form.reset();
-  input.focus();
   return div;
 };
