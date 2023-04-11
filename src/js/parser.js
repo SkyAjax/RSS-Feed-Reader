@@ -7,8 +7,7 @@ export default (response) => {
     error.isParseError = true;
     throw new Error(error.textContent);
   }
-  const itemsArray = [];
-  items.map((item) => itemsArray.push({
+  const itemsArray = items.map((item) => ({
     title: item.querySelector('title').textContent,
     description: item.querySelector('description').textContent,
     link: item.querySelector('link').textContent,

@@ -1,8 +1,9 @@
 import i18n from 'i18next';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
+import * as yup from 'yup';
 import createWatchedState from './watchers';
-import createYupSchema from './yup';
+import createYupSchema from './yup_schema';
 import resources from '../locales';
 import { createProxyLink } from './helpers';
 import parseData from './parser';
@@ -35,30 +36,37 @@ export default () => {
           error: '',
         },
         input: { state: 'valid' },
-        feedsList: [],
-        itemsList: [],
+        feeds: [],
+        posts: [],
         uiState: {
-          previewButton: [],
+          seenPosts: [],
           modalWindow: null,
         },
       };
 
+      yup.setLocale({
+        mixed: {
+          notOneOf: 'errors.notUnique',
+        },
+        string: {
+          url: 'errors.notValid',
+        },
+      });
       const watchedState = createWatchedState(state, i18nInstance);
       watchedState.feed.state = 'idle';
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
+        watchedState.feed.state = 'loading';
         const newUrl = new FormData(e.target);
         const link = { url: newUrl.get('url').trim() };
-        const linksList = watchedState.feedsList.map((feed) => feed.link);
+        const linksList = watchedState.feeds.map((feed) => feed.link);
         const validationSchema = createYupSchema(linksList, link);
         validationSchema.validate(link)
           .then((response) => {
-            watchedState.feed.error = '';
-            watchedState.feed.state = 'loading';
             axios.get(createProxyLink(response.url))
               .then((data) => {
-                watchedState.input.state = 'idle';
+                watchedState.feed.state = 'idle';
                 const parsedData = parseData(data);
                 parsedData.feed.link = response.url;
                 const feedId = Number(uniqueId());
@@ -68,8 +76,8 @@ export default () => {
                   post.feedId = feedId;
                   post.id = Number(uniqueId());
                 });
-                watchedState.feedsList.push(parsedData.feed);
-                watchedState.itemsList.push(...parsedData.items);
+                watchedState.feeds.push(parsedData.feed);
+                watchedState.posts.push(...parsedData.items);
                 watchedState.input.state = 'valid';
                 watchedState.feed.state = 'completed';
               })
@@ -87,7 +95,7 @@ export default () => {
               });
           })
           .catch((err) => {
-            watchedState.feed.error = i18nInstance.t(err.message);
+            watchedState.feed.error = err.message;
             watchedState.input.state = 'invalid';
             watchedState.feed.state = 'failed';
           });
@@ -99,34 +107,31 @@ export default () => {
           return;
         }
         watchedState.uiState.modalWindow = Number(e.target.dataset.id);
-        watchedState.uiState.previewButton.push(Number(e.target.dataset.id));
+        watchedState.uiState.seenPosts.push(Number(e.target.dataset.id));
       });
 
       const checkNewPosts = () => {
-        const linksList = watchedState.feedsList.map((feed) => feed.link);
-        if (linksList.length !== 0) {
-          Promise.all(linksList.map((link) => axios.get(createProxyLink(link))))
-            .then((responseData) => {
-              responseData.forEach((response) => {
-                const latestParsedData = parseData(response);
-                const links = watchedState.itemsList
-                  .flatMap((items) => items)
-                  .map((item) => item.link);
-                latestParsedData.items.forEach((item) => {
-                  if (!links.includes(item.link)) {
-                    const feedId = watchedState.feedsList
-                      .find((feed) => feed.title === latestParsedData.feed.title);
-                    const post = item;
-                    post.feedId = feedId.id;
-                    post.id = Number(uniqueId());
-                    watchedState.itemsList.push(item);
-                  }
-                });
+        const linksList = watchedState.feeds.map((feed) => feed.link);
+        Promise.all(linksList.map((link) => axios.get(createProxyLink(link))))
+          .then((responseData) => {
+            responseData.forEach((response) => {
+              const latestParsedData = parseData(response);
+              const links = watchedState.posts
+                .flatMap((items) => items)
+                .map((item) => item.link);
+              latestParsedData.items.forEach((item) => {
+                if (!links.includes(item.link)) {
+                  const feedId = watchedState.feeds
+                    .find((feed) => feed.title === latestParsedData.feed.title);
+                  const post = item;
+                  post.feedId = feedId.id;
+                  post.id = Number(uniqueId());
+                  watchedState.posts.push(item);
+                }
               });
-            })
-            .finally(() => null);
-        }
-        setTimeout(checkNewPosts, 5000);
+            });
+          })
+          .finally(setTimeout(checkNewPosts, 5000));
       };
       setTimeout(checkNewPosts, 5000);
     });
