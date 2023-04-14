@@ -1,11 +1,11 @@
 import i18n from 'i18next';
 import axios from 'axios';
-import { uniqueId } from 'lodash';
+import { differenceWith, uniqueId } from 'lodash';
 import * as yup from 'yup';
 import createWatchedState from './watchers';
 import createYupSchema from './yup_schema';
 import resources from '../locales';
-import { createProxyLink } from './helpers';
+import createProxyLink from './helpers';
 import parseData from './parser';
 
 export default () => {
@@ -32,7 +32,7 @@ export default () => {
       const state = {
         activeLanguage: defaultLanguage,
         feed: {
-          state: 'idle',
+          state: '',
           error: '',
         },
         input: { state: 'valid' },
@@ -53,7 +53,6 @@ export default () => {
         },
       });
       const watchedState = createWatchedState(state, i18nInstance);
-      watchedState.feed.state = 'idle';
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -66,18 +65,18 @@ export default () => {
           .then((response) => {
             axios.get(createProxyLink(response.url))
               .then((data) => {
-                watchedState.feed.state = 'idle';
                 const parsedData = parseData(data);
-                parsedData.feed.link = response.url;
+                const copyParsedData = { ...parsedData };
+                copyParsedData.feed.link = response.url;
                 const feedId = Number(uniqueId());
-                parsedData.feed.id = feedId;
-                parsedData.items.forEach((item) => {
+                copyParsedData.feed.id = feedId;
+                copyParsedData.items.forEach((item) => {
                   const post = item;
                   post.feedId = feedId;
                   post.id = Number(uniqueId());
                 });
-                watchedState.feeds.push(parsedData.feed);
-                watchedState.posts.push(...parsedData.items);
+                watchedState.feeds.push(copyParsedData.feed);
+                watchedState.posts.push(...copyParsedData.items);
                 watchedState.input.state = 'valid';
                 watchedState.feed.state = 'completed';
               })
@@ -90,7 +89,6 @@ export default () => {
                 } else {
                   watchedState.feed.error = 'PARSE';
                 }
-                watchedState.input.state = 'invalid';
                 watchedState.feed.state = 'failed';
               });
           })
@@ -116,19 +114,11 @@ export default () => {
           .then((responseData) => {
             responseData.forEach((response) => {
               const latestParsedData = parseData(response);
-              const links = watchedState.posts
-                .flatMap((items) => items)
-                .map((item) => item.link);
-              latestParsedData.items.forEach((item) => {
-                if (!links.includes(item.link)) {
-                  const feedId = watchedState.feeds
-                    .find((feed) => feed.title === latestParsedData.feed.title);
-                  const post = item;
-                  post.feedId = feedId.id;
-                  post.id = Number(uniqueId());
-                  watchedState.posts.push(item);
-                }
-              });
+              const oldPosts = watchedState.posts;
+              const newPosts = latestParsedData.items;
+              const posts = differenceWith(newPosts, oldPosts, (p1, p2) => p1.title === p2.title)
+                .map((post) => ({ ...post, id: Number(uniqueId()) }));
+              watchedState.posts.unshift(...posts);
             });
           })
           .finally(setTimeout(checkNewPosts, 5000));
