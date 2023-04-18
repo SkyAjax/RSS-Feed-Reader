@@ -79,12 +79,12 @@ const renderState = (value, state, i18nInstance, elements) => {
     input.removeAttribute('readonly');
     input.setAttribute('spellcheck', 'false');
     input.setAttribute('data-ms-editor', 'true');
-    if (state.feed.error === 'ERR_NETWORK') {
+    if (state.feedLoading.error === 'ERR_NETWORK') {
       p.textContent = i18nInstance.t('errors.network');
-    } else if (state.feed.error === 'PARSE') {
+    } else if (state.feedLoading.error === 'PARSE') {
       p.textContent = i18nInstance.t('errors.noRss');
     } else {
-      p.textContent = i18nInstance.t(state.feed.error);
+      p.textContent = i18nInstance.t(state.feedLoading.error);
     }
   }
   if (value === 'completed') {
@@ -139,12 +139,20 @@ const renderFeeds = (state, i18nInstance, elements) => {
 
 const renderInput = (state, elements) => {
   const { input } = elements;
-  if (state.input.state === 'invalid') {
+  if (state.form.state === 'invalid') {
     input.classList.add('is-invalid');
   }
 };
 
 export default (state, i18nInstance) => {
+  document.querySelector('.display-3').textContent = i18nInstance.t('title');
+  document.querySelector('.lead').textContent = i18nInstance.t('subtitle');
+  document.querySelector('.url-input-description').textContent = i18nInstance.t('urlInputDescription');
+  document.querySelector('.full-article').textContent = i18nInstance.t('buttons.openFull');
+  document.querySelector('.btn-lg').textContent = i18nInstance.t('buttons.add');
+  document.querySelector('.text-muted').textContent = i18nInstance.t('linkExample');
+  document.querySelector('.btn-secondary').textContent = i18nInstance.t('buttons.close');
+  document.getElementById('credits').innerHTML = i18nInstance.t('author', { author: '<a href="https://github.com/SkyAjax/frontend-project-11" target="_blank">' });
   const elements = {
     postsContainer: document.querySelector('.posts'),
     feedsContainer: document.querySelector('.feeds'),
@@ -155,10 +163,10 @@ export default (state, i18nInstance) => {
   };
   return onChange(state, (path, value) => {
     switch (path) {
-      case 'feed.state':
+      case 'feedLoading.state':
         renderState(value, state, i18nInstance, elements);
         break;
-      case 'input.state':
+      case 'form.state':
         renderInput(state, elements);
         break;
       case 'feeds':

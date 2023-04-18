@@ -18,24 +18,15 @@ export default () => {
     resources,
   })
     .then(() => {
-      document.querySelector('.display-3').textContent = i18nInstance.t('title');
-      document.querySelector('.lead').textContent = i18nInstance.t('subtitle');
-      document.querySelector('.url-input-description').textContent = i18nInstance.t('urlInputDescription');
-      document.querySelector('.full-article').textContent = i18nInstance.t('buttons.openFull');
-      document.querySelector('.btn-lg').textContent = i18nInstance.t('buttons.add');
-      document.querySelector('.text-muted').textContent = i18nInstance.t('linkExample');
-      document.querySelector('.btn-secondary').textContent = i18nInstance.t('buttons.close');
-      document.getElementById('credits').innerHTML = i18nInstance.t('author', { author: '<a href="https://github.com/SkyAjax/frontend-project-11" target="_blank">' });
-
       const form = document.querySelector('form');
 
       const state = {
         activeLanguage: defaultLanguage,
-        feed: {
+        feedLoading: {
           state: '',
           error: '',
         },
-        input: { state: 'valid' },
+        form: { state: 'valid' },
         feeds: [],
         posts: [],
         uiState: {
@@ -56,7 +47,7 @@ export default () => {
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        watchedState.feed.state = 'loading';
+        watchedState.feedLoading.state = 'loading';
         const newUrl = new FormData(e.target);
         const link = { url: newUrl.get('url').trim() };
         const linksList = watchedState.feeds.map((feed) => feed.link);
@@ -77,52 +68,53 @@ export default () => {
                 });
                 watchedState.feeds.push(copyParsedData.feed);
                 watchedState.posts.push(...copyParsedData.items);
-                watchedState.input.state = 'valid';
-                watchedState.feed.state = 'completed';
+                watchedState.form.state = 'valid';
+                watchedState.feedLoading.state = 'completed';
               })
               .catch((error) => {
                 console.error(error.message);
                 if (error.isAxiosError) {
-                  watchedState.feed.error = error.code;
+                  watchedState.feedLoading.error = error.code;
                 } else if (error.isParseError) {
-                  watchedState.feed.error = error.code;
+                  watchedState.feedLoading.error = error.code;
                 } else {
-                  watchedState.feed.error = 'PARSE';
+                  watchedState.feedLoading.error = 'PARSE';
                 }
-                watchedState.feed.state = 'failed';
+                watchedState.feedLoading.state = 'failed';
               });
           })
           .catch((err) => {
-            watchedState.feed.error = err.message;
-            watchedState.input.state = 'invalid';
-            watchedState.feed.state = 'failed';
+            watchedState.feedLoading.error = err.message;
+            watchedState.form.state = 'invalid';
+            watchedState.feedLoading.state = 'failed';
           });
       });
 
       const postsContainer = document.querySelector('.posts');
       postsContainer.addEventListener('click', (e) => {
-        if (e.target.dataset.bsToggle !== 'modal') {
+        if (!e.target.parentNode.classList.contains('list-group-item')) {
           return;
         }
         watchedState.uiState.modalWindow = Number(e.target.dataset.id);
         watchedState.uiState.seenPosts.push(Number(e.target.dataset.id));
       });
 
+      const refreshTime = 5000;
       const checkNewPosts = () => {
         const linksList = watchedState.feeds.map((feed) => feed.link);
-        Promise.all(linksList.map((link) => axios.get(createProxyLink(link))))
-          .then((responseData) => {
-            responseData.forEach((response) => {
-              const latestParsedData = parseData(response);
-              const oldPosts = watchedState.posts;
-              const newPosts = latestParsedData.items;
-              const posts = differenceWith(newPosts, oldPosts, (p1, p2) => p1.title === p2.title)
-                .map((post) => ({ ...post, id: Number(uniqueId()) }));
-              watchedState.posts.unshift(...posts);
-            });
+        const promises = linksList.map((link) => axios.get(createProxyLink(link))
+          .then((response) => {
+            const latestParsedData = parseData(response);
+            const oldPosts = watchedState.posts;
+            const newPosts = latestParsedData.items;
+            const posts = differenceWith(newPosts, oldPosts, (p1, p2) => p1.title === p2.title)
+              .map((post) => ({ ...post, id: Number(uniqueId()) }));
+            watchedState.posts.unshift(...posts);
           })
-          .finally(setTimeout(checkNewPosts, 5000));
+          .catch((error) => console.error(error)));
+        Promise.all(promises)
+          .finally(setTimeout(checkNewPosts, refreshTime));
       };
-      setTimeout(checkNewPosts, 5000);
+      setTimeout(checkNewPosts, refreshTime);
     });
 };
